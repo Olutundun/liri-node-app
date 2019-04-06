@@ -1,13 +1,13 @@
-#LIRI
+# LIRI
 
 LIRI is a Language Interpretation and Recognition Interface. LIRI will be a command line node app that takes in parameters and gives you back data.
 
-##APIs used:
+## APIs used:
 * Spotify
 * Bands in Town Events API
 * OMDb API
 
-##Packages used:
+## Packages used:
 * node-spotify-api
 * Axios
 * Moment.js
@@ -53,7 +53,7 @@ Uses Axios to retrieve concert data from the Bands in Town Events API. It displa
 * Venue location
 * Show date and Time (uses moment.js to format date and time)
 
-##log.txt
+## log.txt
 uses fs to append the output to a log file  
 ![](./images/log.GIF)
 
