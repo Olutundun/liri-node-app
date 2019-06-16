@@ -38,11 +38,15 @@ switch (command) {
 }
 
 //spotify
-function song(songs) {
+var getArtistNames = function (artist) {
+  return artist.name;
+};
+
+function song() {
   var songName = "";
   if (value) {
     songName = nodeArgs.slice(3).join("+");
-  } else {
+  } else if(!value) {
     songName = 'The Sign';
   }
   spotify.search({
@@ -54,24 +58,19 @@ function song(songs) {
         console.log('Error occurred: ' + err);
         return;
       }
+      var songs = data.tracks.items;
+logIt()
+      for (var i = 0; i < songs.length; i++) {
 
-      var songInfo = data.tracks.items[0];
-      // if there are multiple artists on song
-      var artistName = data.tracks.items[0].artists[0].name;
-      for (i = 1; i < songInfo.artists.length; i++) {
-        if (songInfo.artists.length > 1) {
-          if (data.tracks.items[0].artists.length > 1) {
-            artistName = artistName + ", " + data.tracks.items[0].artists[i].name;
-          }
-
-        }
+        console.log("************Your Songs*************")
+        console.log(i);
+        console.log("artist(s): " + songs[i].artists.map(getArtistNames));
+        console.log("song name: " + songs[i].name);
+        console.log("preview song: " + songs[i].preview_url);
+        console.log("album: " + songs[i].album.name);
+        console.log("-----------------------------------");
+        
       }
-      console.log("---------Your Song--------------");
-      console.log("Artist(s): " + artistName);
-      console.log("Song Name: " + songInfo.name);
-      console.log("Preview Link: " + songInfo.preview_url);
-      console.log("Album: " + songInfo.album.name);
-      logIt();
     });
 }
 
@@ -84,7 +83,6 @@ function movie() {
     movieName = 'mr nobody';
     console.log("If you haven't watched 'Mr. Nobody,' then you should: http://www.imdb.com/title/tt0485947/");
     console.log("It's on Netflix!")
-    console.log("---------Your Movie--------------");
   }
 
   axios.get("http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy&tomatoes=true").then(
@@ -99,54 +97,46 @@ function movie() {
       console.log("Language: " + response.data.Language);
       console.log("Plot: " + response.data.Plot);
       console.log("Actors: " + response.data.Actors);
-      logIt();
     }
   );
 }
 //Concert 
-function concert() {
+function concert(band) {
   var band = "";
   if (value) {
     band = nodeArgs.slice(3).join(" ");
   } else {
-    console.log('Error');
+    console.log('No results found for ' + value);
+    return;
   }
   axios.get("https://rest.bandsintown.com/artists/" + band + "/events?app_id=codingbootcamp").then(
     function (response) {
-      console.log("---------Your Concert--------------");
-      console.log("Venue:  " + response.data[0].venue.name);
-      console.log("Date & Time: " + moment(response.data[2].datetime).format("MM/DD/YYYY, h:mm a"));
-      console.log("City: " + response.data[0].venue.city);
-      console.log("State: " + response.data[0].venue.region);
-      console.log("Country: " + response.data[0].venue.country);
-      logIt();
-    }
-  )
-}
+      const jsonData = response.data;
+
+      for (var i = 0; i < jsonData.length; i++) {
+        var show = jsonData[i];
+
+        // If a concert doesn't have a region, display the country instead
+        console.log("The concert will be in " + show.venue.city + "," +
+          (show.venue.region || show.venue.country) + " at " + show.venue.name + " " +
+          moment(show.datetime).format("MM/DD/YYYY")
+        )
+      }
+    })
+};
 
 //reads the file random.txt and executes the command in that file
 function doIt() {
   if (command === "do-what-it-says") {
-    fs.readFile("random.txt", "utf8", function (err, data) {
-      if (err) {
-        console.log(err);
-      } else {
-        var dataArr = data.split(",");
 
-      }
-
-      //logIt();
-    })
+    fs.readFile("random.txt", "utf8", function (error, data) {
+      //console.log(data);
+      var dataArr = data.split(",");
+      console.log(dataArr)
+    
+      if (dataArr[0] === "spotify-this-song"){ 
+        song(dataArr[1]);
+    }
+    });
   }
-}
-
-
-//saves command and user query to log.txt 
-function logIt() {
-  var log = (command + ": " + value + ", " + "\n")
-  fs.appendFile("log.txt", log, function (err) {
-    if (err) {
-      console.log(err);
-    } else {}
-  })
 }
